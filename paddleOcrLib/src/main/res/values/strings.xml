@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="OCR_MODEL_DIR_DEFAULT">models</string>
+    <string name="OCR_REC_LABEL_DEFAULT">labels/ppocr_keys_v1.txt</string>
+    <string name="CPU_THREAD_NUM_DEFAULT">2</string>
+    <string name="CPU_POWER_MODE_DEFAULT">LITE_POWER_HIGH</string>
+    <string name="SCORE_THRESHOLD_DEFAULT">0.4</string>
+    <string name="SCORE_THRESHOLD_CLASSIFICATION">0.1</string>
+    <string name="SCORE_THRESHOLD_FACEDET">0.25</string>
+    <string name="ENABLE_LITE_FP16_MODE_DEFAULT">true</string>
+
+    <string name="app_name">CameraX Basic</string>
+    <string name="capture_button_alt">Capture</string>
+    <string name="switch_camera_button_alt">Switch camera</string>
+    <string name="gallery_button_alt">Gallery</string>
+    <string name="back_button_alt">Back</string>
+    <string name="share_button_alt">Share</string>
+    <string name="share_hint">Share using</string>
+    <string name="capture_mode_camera">Camera</string>
+    <string name="capture_mode_hdr">HDR</string>
+    <string name="capture_mode_night">Night</string>
+    <string name="delete_button_alt">Delete</string>
+    <string name="delete_dialog">Delete current photo?</string>
+    <string name="delete_title">Confirm</string>
+</resources>

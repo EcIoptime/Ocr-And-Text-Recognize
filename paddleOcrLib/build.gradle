@@ -1,0 +1,220 @@
+import java.security.MessageDigest
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.example.paddleocrlib'
+    compileSdk 33
+    buildToolsVersion "33.0.0"
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        renderscriptTargetApi 33
+        renderscriptSupportModeEnabled true
+
+        ndk {
+            abiFilters "armeabi-v7a"//, /*"x86" ,"x86_64" ,*/"arm64-v8a"
+//            abiFilters  "armeabi-v7a"/* ,"x86_64"*/
+        }
+
+        python {
+            version "3.8"
+
+//            buildPython "C:/Program Files/Python38/python.exe"
+            buildPython "C:/Users/Lenovo/AppData/Local/Programs/Python/Python38/python.exe"
+
+            pip {
+                options "--extra-index-url", "https://pypi.python.org/simple/"
+//                install "pep517"
+                install "spacy==2.2.3"
+
+            }
+
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
+
+
+
+}
+
+dependencies {
+
+    implementation  project(":paddleOcrLib:fastDeploy"/*, configuration = "default"*/)
+//    implementation files('libs/fastdeploy-android-sdk-latest-dev.aar')
+//    implementation fileTree(include: ['*.aar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.github.kurzdigital:mrzparser-java:1.0.0'
+    implementation 'org.jetbrains:annotations:16.0.1'
+
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.microsoft.device.dualscreen:twopanelayout:1.0.0-alpha10'
+    implementation 'com.microsoft.device.dualscreen:twopanelayout:1.0.0-alpha10'
+    implementation 'com.microsoft.device.dualscreen:windowstate:1.0.0-alpha1'
+    def nav_version = "2.3.5"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+
+
+    implementation "androidx.camera:camera-core:1.2.2"
+
+    // CameraX Camera2 extensions
+    implementation "androidx.camera:camera-camera2:1.2.2"
+
+    // CameraX Lifecycle library
+    implementation "androidx.camera:camera-lifecycle:1.2.2"
+
+    // CameraX View class
+    implementation "androidx.camera:camera-view:1.2.2"
+    implementation 'androidx.window:window:1.0.0-alpha09'
+    implementation 'androidx.concurrent:concurrent-futures-ktx:1.1.0'
+//    implementation 'com.github.harrisonsj:KProgressHUD:1.1'
+
+    api project(path: ':still')
+
+    //pref
+    implementation 'hu.autsoft:krate:1.2.0'
+    implementation 'hu.autsoft:krate-kotlinx:1.0.0'
+    implementation 'hu.autsoft:krate-gson:1.2.0'
+
+    // Tensorflow Lite in Play Services dependencies
+    api 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
+    api "com.google.android.gms:play-services-tflite-gpu:16.2.0"
+    api "com.google.android.gms:play-services-tflite-java:16.1.0"
+    api "com.google.android.gms:play-services-tflite-support:16.1.0"
+//    implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+    api 'org.tensorflow:tensorflow-lite:2.13.0' // Use the same version for both libraries
+    api 'org.tensorflow:tensorflow-lite-api:2.13.0'
+
+}
+
+
+
+
+
+def FD_MODEL = [
+        [
+                'src' : 'https://bj.bcebos.com/paddlehub/fastdeploy/ch_PP-OCRv3_det_infer.tgz',
+                'dest': 'src/main/assets/models'
+        ],
+        [
+                'src' : 'https://bj.bcebos.com/paddlehub/fastdeploy/ch_ppocr_mobile_v2.0_cls_infer.tgz',
+                'dest': 'src/main/assets/models'
+        ],
+        [
+                'src' : 'https://bj.bcebos.com/paddlehub/fastdeploy/ch_PP-OCRv3_rec_infer.tgz',
+                'dest': 'src/main/assets/models'
+        ]
+]
+
+def FD_JAVA_SDK = [
+        [
+                'src' : 'https://bj.bcebos.com/fastdeploy/test/fastdeploy-android-sdk-latest-dev.aar',
+                'dest': 'libs'
+        ]
+]
+
+task downloadAndExtractModels(type: DefaultTask) {
+    doFirst {
+        println "Downloading and extracting fastdeploy models ..."
+    }
+    doLast {
+        String cachePath = "cache"
+        if (!file("${cachePath}").exists()) {
+            mkdir "${cachePath}"
+        }
+        FD_MODEL.eachWithIndex { model, index ->
+            MessageDigest messageDigest = MessageDigest.getInstance('MD5')
+            messageDigest.update(model.src.bytes)
+            String[] modelPaths = model.src.split("/")
+            String modelName = modelPaths[modelPaths.length - 1]
+            // Download the target model if not exists
+            boolean copyFiles = !file("${model.dest}").exists()
+            if (!file("${cachePath}/${modelName}").exists()) {
+                println "Downloading ${model.src} -> ${cachePath}/${modelName}"
+                ant.get(src: model.src, dest: file("${cachePath}/${modelName}"))
+                copyFiles = true
+            }
+            if (copyFiles) {
+                println "Coping ${cachePath}/${modelName} -> ${model.dest}"
+                copy {
+                    from tarTree("${cachePath}/${modelName}")
+                    into "${model.dest}"
+                }
+            }
+        }
+    }
+}
+
+task downloadAndExtractSDKs(type: DefaultTask) {
+    doFirst {
+        println "Downloading and extracting fastdeploy android java sdk ..."
+    }
+    doLast {
+        String cachePath = "cache"
+        if (!file("${cachePath}").exists()) {
+            mkdir "${cachePath}"
+        }
+        FD_JAVA_SDK.eachWithIndex { sdk, index ->
+            String[] sdkPaths = sdk.src.split("/")
+            String sdkName = sdkPaths[sdkPaths.length - 1]
+            // Download the target SDK if not exists
+            boolean copyFiles = !file("${sdk.dest}/${sdkName}").exists()
+            if (!file("${cachePath}/${sdkName}").exists()) {
+                println "Downloading ${sdk.src} -> ${cachePath}/${sdkName}"
+                ant.get(src: sdk.src, dest: file("${cachePath}/${sdkName}"))
+                copyFiles = true
+            }
+            if (copyFiles) {
+                println "Coping ${cachePath}/${sdkName} -> ${sdk.dest}/${sdkName}"
+                copy {
+                    from "${cachePath}/${sdkName}"
+                    into "${sdk.dest}"
+                }
+            }
+        }
+    }
+}
+
+preBuild.dependsOn downloadAndExtractSDKs
+preBuild.dependsOn downloadAndExtractModels

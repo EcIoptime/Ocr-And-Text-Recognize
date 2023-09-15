@@ -1,0 +1,173 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'kotlin-kapt'
+//    id 'com.chaquo.python'
+}
+
+android {
+    namespace 'com.example.ocr'
+    compileSdk 33
+    buildToolsVersion "33.0.0"
+
+    defaultConfig {
+        applicationId "com.example.ocr"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters  "armeabi-v7a"/* ,"x86_64"*/
+        }
+
+        renderscriptTargetApi 33
+        renderscriptSupportModeEnabled true
+
+//        python {
+//            version "3.8"
+//
+////            buildPython "C:/Program Files/Python38/python.exe"
+//            buildPython "C:/Users/Lenovo/AppData/Local/Programs/Python/Python38/python.exe"
+//
+//            pip {
+//                options "--extra-index-url", "https://pypi.python.org/simple/"
+////                install "pep517"
+//                install "spacy==2.2.3"
+//
+//            }
+//
+//        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+//    allprojects {
+//        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+//            kotlinOptions {
+//                jvmTarget = "17"
+//            }
+//        }
+//    }
+
+
+    buildFeatures {
+//        dataBinding = true
+        viewBinding true
+    }
+
+//    aaptOptions {
+//        noCompress "tflite"
+//        noCompress "lite"
+//    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def formattedDate = new Date().format('dd MMM')
+            def flavor = variant.name
+            def versionName = variant.versionName
+//            outputFileName = "FingerPrint Scanner ${flavor}_${versionName}_${formattedDate}.apk"
+            outputFileName = "Ocr App V${versionName}_${formattedDate}.apk"
+        }
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation project(path: ':paddleOcrLib')
+//    implementation project(path: ':still')
+    implementation project(path: ':livenesscamerax')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+
+//    implementation 'com.regula.documentreader.core:fullrfid:6.2.+@aar'//@aar
+//    implementation('com.regula.documentreader:api:6.2.+@aar') {
+//        transitive true
+//    }
+//    implementation('com.regula.face:api:3.1.+@aar') {
+//        transitive = true
+//    }
+
+    //lifecycle
+    implementation "androidx.activity:activity:1.7.2"
+    implementation "androidx.activity:activity-ktx:1.7.2"
+    implementation "androidx.fragment:fragment-ktx:1.6.1"
+    implementation "androidx.fragment:fragment:1.6.1"
+
+
+//    def camerax_version = "1.2.2"
+//    implementation "androidx.camera:camera-core:$camerax_version"
+//    implementation "androidx.camera:camera-camera2:$camerax_version"
+//    implementation "androidx.camera:camera-lifecycle:$camerax_version"
+//    implementation 'androidx.camera:camera-view:1.2.2'
+
+
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
+//    implementation("androidx.fragment:fragment-ktx:1.5.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
+
+    //glide
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    kapt 'com.github.bumptech.glide:compiler:4.11.0'
+
+
+    //pref
+    implementation 'hu.autsoft:krate:1.2.0'
+    implementation 'hu.autsoft:krate-kotlinx:1.0.0'
+    implementation 'hu.autsoft:krate-gson:1.2.0'
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.2'
+
+    //coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4'
+
+    //gradle
+    implementation 'com.kaopiz:kprogresshud:1.2.0'
+
+    //Architecture Components
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+
+
+    // Room DB
+    implementation 'androidx.room:room-runtime:2.5.1'
+    implementation "androidx.room:room-ktx:2.5.1"
+    kapt 'androidx.room:room-compiler:2.5.1'
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.retrofit2:adapter-rxjava3:2.9.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.7.2"
+
+
+//    implementation 'org.tensorflow:tensorflow-lite:2.7.0'
+
+
+
+
+}
