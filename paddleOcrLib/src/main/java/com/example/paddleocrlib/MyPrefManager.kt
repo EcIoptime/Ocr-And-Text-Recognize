@@ -29,6 +29,7 @@ class MyPrefManager(var context: Context) : Krate {
 
     companion object{
         private var instance:MyPrefManager? =null
+        @Synchronized
         fun  getInstance(context:Context): MyPrefManager? {
             if (instance ==null){
                 instance = MyPrefManager(context = context)

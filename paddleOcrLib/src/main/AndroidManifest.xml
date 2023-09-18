@@ -2,8 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:name=".AppControllerPaddleOcr" >
-        <activity android:name="com.example.paddleocrlib.OcrModule"
+        >
+        <activity
+            android:name="com.example.paddleocrlib.OcrModule"
             android:screenOrientation="portrait"
             android:launchMode="singleInstance" />
     </application>

@@ -4,6 +4,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.chaquo.python'
+    id 'maven-publish'
 }
 
 android {
@@ -71,10 +72,12 @@ android {
 
 dependencies {
 
-    implementation  project(":paddleOcrLib:fastDeploy"/*, configuration = "default"*/)
-//    implementation files('libs/fastdeploy-android-sdk-latest-dev.aar')
+//    implementation  project(":paddleOcrLib:fastDeploy"/*, configuration = "default"*/)
+    implementation files('libs/fastdeploy-android-sdk-latest-dev.aar')
 //    implementation fileTree(include: ['*.aar'], dir: 'libs')
     implementation 'androidx.appcompat:appcompat:1.6.1'
+//    implementation 'com.ioptime:fast-deploy:1.0.0'
+
     implementation 'com.google.android.material:material:1.8.0'
 
     testImplementation 'junit:junit:4.13.2'
@@ -111,11 +114,12 @@ dependencies {
 //    implementation 'com.github.harrisonsj:KProgressHUD:1.1'
 
     api project(path: ':still')
+//    api ("com.darwin.viola:still:1.0.0")
 
     //pref
-    implementation 'hu.autsoft:krate:1.2.0'
-    implementation 'hu.autsoft:krate-kotlinx:1.0.0'
-    implementation 'hu.autsoft:krate-gson:1.2.0'
+    implementation ("hu.autsoft:krate:1.2.0")
+    implementation ("hu.autsoft:krate-kotlinx:1.0.0")
+    implementation ("hu.autsoft:krate-gson:1.2.0")
 
     // Tensorflow Lite in Play Services dependencies
     api 'org.tensorflow:tensorflow-lite-task-vision-play-services:0.4.2'
@@ -218,3 +222,40 @@ task downloadAndExtractSDKs(type: DefaultTask) {
 
 preBuild.dependsOn downloadAndExtractSDKs
 preBuild.dependsOn downloadAndExtractModels
+
+
+
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId = 'com.ioptime'
+            artifactId = 'paddleocrlib'
+            version = '1.0.0'
+
+//            from components.release
+
+            // Include dependencies in the AAR
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+                configurations.implementation.allDependencies.each {
+                    def dependencyNode = dependenciesNode.appendNode('dependency')
+                    dependencyNode.appendNode('groupId', it.group)
+                    dependencyNode.appendNode('artifactId', it.name)
+                    dependencyNode.appendNode('version', it.version)
+                }
+            }
+
+            // Include AAR B in the AAR
+            artifact("$buildDir/outputs/aar/paddleOcrLib-debug.aar") {
+                classifier 'aar-with-dependencies'
+            }
+        }
+    }
+    repositories {
+        mavenLocal() // Publish to local Maven repository
+    }
+}
+
