@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'maven-publish'
 }
 
 apply from: "$rootDir/dependencies.gradle"
@@ -38,8 +39,10 @@ android {
 
 dependencies {
 
-    implementation project(path: ":livenesscamerax:domain")
-    implementation project(path: ":livenesscamerax:core")
+//    implementation project(path: ":livenesscamerax:domain")
+    implementation "com.ioptime:livenesscamerax.domain:1.0.0"
+//    implementation project(path: ":livenesscamerax:core")
+    implementation "com.ioptime:livenesscamerax.core:1.0.0"
 
     implementation "androidx.core:core-ktx:$versions.ktx"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle"
@@ -55,4 +58,17 @@ dependencies {
 
     //Apache
     implementation "org.apache.commons:commons-io:$versions.apacheCommons"
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId 'com.ioptime'
+                artifactId 'livenesscamerax.camerax'
+                version '1.0.0'
+            }
+        }
+    }
 }

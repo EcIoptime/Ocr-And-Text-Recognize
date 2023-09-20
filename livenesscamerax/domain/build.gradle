@@ -1,18 +1,55 @@
 plugins {
-    id 'java-library'
-    id 'kotlin'
+    id 'com.android.library'
+//    id 'java-library'
+//    id 'kotlin'
+    id 'kotlin-android'
+    id 'maven-publish'
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_17
+//    targetCompatibility = JavaVersion.VERSION_17
+//}
+
+apply from: "$rootDir/dependencies.gradle"
+
 android {
+    namespace 'com.schaefer.domain'
+
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildToolsVersion
+
+//    defaultConfig {
+//        minSdkVersion versions.minSdk
+//        targetSdkVersion versions.targetSdk
+//
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        consumerProguardFiles "consumer-rules.pro"
+//    }
+//    buildTypes {
+//        release {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+//        }
+//    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = versions.jvmTarget
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.ioptime"
+                artifactId = "livenesscamerax.domain"
+                version = '1.0.0'
+            }
+        }
     }
 }

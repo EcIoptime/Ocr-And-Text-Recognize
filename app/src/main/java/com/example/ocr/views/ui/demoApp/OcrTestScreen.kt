@@ -14,40 +14,20 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.chaquo.python.Python
-import com.chaquo.python.android.AndroidPlatform
-import com.darwin.viola.still.FaceDetectionListener
-import com.darwin.viola.still.Viola
-import com.darwin.viola.still.model.CropAlgorithm
-import com.darwin.viola.still.model.FaceDetectionError
-import com.darwin.viola.still.model.FaceOptions
-import com.darwin.viola.still.model.Result
-import com.example.ocr.common.AppController
 import com.example.ocr.common.Util.showToast
 import com.example.ocr.databinding.ActivityOcrTestScreenBinding
 import com.example.ocr.utilities.Utility
 import com.example.ocr.views.dialogueFragments.SelectOcrTypeDialogue
 import com.example.ocr.views.ui.faceDetect.FaceMatch
 import com.example.paddleocrlib.BaseResult
-import com.example.paddleocrlib.ImageClassificationHelper
 import com.example.paddleocrlib.OcrModuleNew
-import com.example.paddleocrlib.getHeightOfWidth
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
-import com.google.android.gms.tflite.client.TfLiteInitializationOptions
-import com.google.android.gms.tflite.java.TfLite
 import com.schaefer.livenesscamerax.domain.model.CameraSettings
 import com.schaefer.livenesscamerax.domain.model.StepLiveness
 import com.schaefer.livenesscamerax.domain.model.StorageType
 import com.schaefer.livenesscamerax.navigation.LivenessEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.io.File
-import java.util.concurrent.Executors
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 
 class OcrTestScreen : AppCompatActivity() {
@@ -85,38 +65,38 @@ class OcrTestScreen : AppCompatActivity() {
         binding?.livenessCheck?.setOnClickListener { livenessCheckLogic() }
 //        binding?.signatureDetect?.setOnClickListener { signatureDetectLogic() }
 
-        initializeTask
-            .addOnSuccessListener {
-                Log.i("test", "TFLite in Play Services initialized successfully.")
-                classifier = ImageClassificationHelper(this, FaceMatch.MAX_REPORT, useGpu)
-            }
+//        initializeTask
+//            .addOnSuccessListener {
+//                Log.i("test", "TFLite in Play Services initialized successfully.")
+//                classifier = ImageClassificationHelper(this, FaceMatch.MAX_REPORT, useGpu)
+//            }
 
     }
 
-    private var classifier: ImageClassificationHelper? = null
-    private val executor = Executors.newSingleThreadExecutor()
-    private var useGpu = false;
+//    private var classifier: ImageClassificationHelper? = null
+//    private val executor = Executors.newSingleThreadExecutor()
+//    private var useGpu = false;
 
     // Initialize TFLite once. Must be called before creating the classifier
-    private val initializeTask: Task<Void> by lazy {
-        TfLite.initialize(
-            this,
-            TfLiteInitializationOptions.builder()
-                .setEnableGpuDelegateSupport(true)
-                .build()
-        ).continueWithTask { task ->
-            if (task.isSuccessful) {
-                useGpu = false;
-                return@continueWithTask Tasks.forResult(null)
-            } else {
-                // Fallback to initialize interpreter without GPU
-                return@continueWithTask TfLite.initialize(this)
-            }
-        }
-            .addOnFailureListener {
-                Log.e("test", "TFLite in Play Services failed to initialize.", it)
-            }
-    }
+//    private val initializeTask: Task<Void> by lazy {
+//        TfLite.initialize(
+//            this,
+//            TfLiteInitializationOptions.builder()
+//                .setEnableGpuDelegateSupport(true)
+//                .build()
+//        ).continueWithTask { task ->
+//            if (task.isSuccessful) {
+//                useGpu = false;
+//                return@continueWithTask Tasks.forResult(null)
+//            } else {
+//                // Fallback to initialize interpreter without GPU
+//                return@continueWithTask TfLite.initialize(this)
+//            }
+//        }
+//            .addOnFailureListener {
+//                Log.e("test", "TFLite in Play Services failed to initialize.", it)
+//            }
+//    }
 
 //    private fun signatureDetectLogic() {
 //        // Initialize TFLite asynchronously
@@ -170,7 +150,7 @@ class OcrTestScreen : AppCompatActivity() {
                                     }
                                     return@launch
                                 }
-                                extractFaceFromImage(cardImage) { face1 ->
+                                OcrModuleNew.extractFaceFromImage(cardImage) { face1 ->
                                     if (face1 == null) {
                                         lifecycleScope.launch(Dispatchers.Main) {
                                             Utility.hideProgressD(this@OcrTestScreen)
@@ -178,22 +158,34 @@ class OcrTestScreen : AppCompatActivity() {
                                         }
                                         return@extractFaceFromImage
                                     }
-                                    val embedding1 = classifier?.classify(face1, 0)
-                                    val embedding2 = classifier?.classify(face2, 0)
-
-                                    if (embedding1 != null && embedding2 != null) {
-                                        var scoreMatch = findCosineDistance(embedding1, embedding2)
+                                    OcrModuleNew.matchFaces(this@OcrTestScreen ,face1 ,face2) { scoreMatch ->
                                         lifecycleScope.launch(Dispatchers.Main) {
 //                                    val tt = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() -currentTime)
                                             if (scoreMatch > 40)
                                                 binding?.faceMatchText?.text = "Face Matched"
                                             else
                                                 binding?.faceMatchText?.text = "Face Not Matched"
-//                                    binding?.processedText?.text = "Processed Time: ${tt} seconds"
+
                                             Log.i("test", " score matched ${scoreMatch}")
                                             Utility.hideProgressD(this@OcrTestScreen)
                                         }
                                     }
+//                                    val embedding1 = classifier?.classify(face1, 0)
+//                                    val embedding2 = classifier?.classify(face2, 0)
+//
+//                                    if (embedding1 != null && embedding2 != null) {
+//                                        var scoreMatch = findCosineDistance(embedding1, embedding2)
+//                                        lifecycleScope.launch(Dispatchers.Main) {
+////                                    val tt = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() -currentTime)
+//                                            if (scoreMatch > 40)
+//                                                binding?.faceMatchText?.text = "Face Matched"
+//                                            else
+//                                                binding?.faceMatchText?.text = "Face Not Matched"
+////                                    binding?.processedText?.text = "Processed Time: ${tt} seconds"
+//                                            Log.i("test", " score matched ${scoreMatch}")
+//                                            Utility.hideProgressD(this@OcrTestScreen)
+//                                        }
+//                                    }
                                 }
                             }
 
@@ -256,52 +248,6 @@ class OcrTestScreen : AppCompatActivity() {
         binding?.ocrTextRegulaLayout?.visibility = View.VISIBLE
     }
 
-//    private fun checkIfNerRequirementsGood(context: Context, isSuccess: () -> Unit) {
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            try {
-//                if (!Python.isStarted())
-//                    Python.start(AndroidPlatform(context))
-//            } catch (_: Exception) {
-//            }
-//
-//            if (!File(AppController.repository?.localRepository?.prefManager?.modelKenyaIdCardFrontPath).exists()) {
-//                val filePath = Utility.copyZipFromAssetsToCacheAndUnzip(context, "kenya_id_card_front.zip")
-//                AppController.repository?.localRepository?.prefManager?.modelKenyaIdCardFrontPath = filePath ?: ""
-//                Log.i("hello", "copyied file ${filePath}")
-//            }
-//
-//            if (!File(AppController.repository?.localRepository?.prefManager?.modelKenyaIdCardBackPath).exists()) {
-//                val filePath = Utility.copyZipFromAssetsToCacheAndUnzip(context, "kenya_id_card_back.zip")
-//                AppController.repository?.localRepository?.prefManager?.modelKenyaIdCardBackPath = filePath ?: ""
-//                Log.i("hello", "copyied file ${filePath}")
-//            }
-//
-//            if (!File(AppController.repository?.localRepository?.prefManager?.modelAllCardPath).exists()) {
-//                val filePath = Utility.copyZipFromAssetsToCacheAndUnzip(context, "model_text_classifcation.zip")
-//                AppController.repository?.localRepository?.prefManager?.modelAllCardPath = filePath ?: ""
-//                Log.i("hello", "copyied file ${filePath}")
-//            }
-//
-//            lifecycleScope.launch(Dispatchers.Main) {
-//                Log.i("test", "222 ${isSuccess}")
-//
-//                isSuccess.invoke()
-//            }
-//
-//        }
-//
-//
-////        Log.i("test", "filePath  ${filePath}")
-////
-////        try {
-//////            pythonMod.get("set")?.call(filePath);
-////            var result: PyObject = pythonMod.callAttr("process_text", testData, filePath)
-////            val processedText = result.toJava(String::class.java)
-////            Log.i("test", "processed text  ${processedText}")
-////        } catch (e: Exception) {
-////            Log.i("test", "exception: ", e)
-////        }
-//    }
 
     var resultOcr: BaseResult? = null
     private fun scanOcrLogic() {
@@ -421,42 +367,5 @@ class OcrTestScreen : AppCompatActivity() {
         ft?.let { frag.show(it, "SelectOcrTypeDialogue") }
     }
 
-
-    fun findCosineDistance(sourceRepresentation: FloatArray, testRepresentation: FloatArray): Float {
-        val a = sourceRepresentation.indices.sumByDouble { sourceRepresentation[it].toDouble() * testRepresentation[it].toDouble() }
-        val b = sourceRepresentation.sumByDouble { it.toDouble() * it.toDouble() }
-        val c = testRepresentation.sumByDouble { it.toDouble() * it.toDouble() }
-
-        return abs((/*1 -*/ (a / (sqrt(b) * sqrt(c))).toFloat()) * 100f)
-    }
-
-    fun extractFaceFromImage(photo: Bitmap, faceBitmap: (Bitmap?) -> Unit) {
-
-        var bitmapFace = photo
-        bitmapFace = bitmapFace.getHeightOfWidth(1080.0)
-
-        val listener: FaceDetectionListener = object : FaceDetectionListener {
-            override fun onFaceDetected(result: Result) {
-                result.facePortraits.firstOrNull()?.let { face ->
-                    faceBitmap.invoke(face.face)
-                } ?: kotlin.run { faceBitmap.invoke(null) }
-            }
-
-            override fun onFaceDetectionFailed(error: FaceDetectionError, message: String) {
-                faceBitmap.invoke(null)
-                Log.i("test", " error ${error.message}")
-            }
-        }
-
-        val viola = Viola(listener)
-        val faceOption = FaceOptions.Builder()
-//            .enableProminentFaceDetection()
-            .enableDebug()
-            .setMinimumFaceSize(10)
-            .cropAlgorithm(CropAlgorithm.THREE_BY_FOUR)
-            .build()
-
-        viola.detectFace(bitmapFace, faceOption)
-    }
 
 }

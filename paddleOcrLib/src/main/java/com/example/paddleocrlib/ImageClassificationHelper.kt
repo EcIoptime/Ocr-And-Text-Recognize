@@ -25,7 +25,7 @@ import java.io.File
 
 
 /** Helper class used to communicate between our app and the TF image classification model */
-class ImageClassificationHelper(context: Context, private val maxResult: Int, private val useGpu: Boolean) : Closeable {
+internal class ImageClassificationHelper(context: Context, private val maxResult: Int, private val useGpu: Boolean) : Closeable {
     init {
 //        MODEL_PATH = copyAssetToStorage(context , "face_model_quant.tflite" )
 //        Log.i("test","MODEL_PATH   ${MODEL_PATH}")

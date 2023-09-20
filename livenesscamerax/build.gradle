@@ -54,9 +54,12 @@ android {
 }
 
 dependencies {
-    implementation project(path: ":livenesscamerax:core")
-    implementation project(path: ":livenesscamerax:domain")
-    implementation project(path: ":livenesscamerax:camera")
+//    implementation project(path: ":livenesscamerax:core")
+    implementation "com.ioptime:livenesscamerax.core:1.0.0"
+//    implementation project(path: ":livenesscamerax:domain")
+    implementation "com.ioptime:livenesscamerax.domain:1.0.0"
+//    implementation project(path: ":livenesscamerax:camera")
+    implementation "com.ioptime:livenesscamerax.camerax:1.0.0"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin"
 
@@ -78,20 +81,53 @@ dependencies {
     implementation "androidx.camera:camera-camera2:$versions.cameraX"
     implementation "androidx.camera:camera-lifecycle:$versions.cameraX"
     implementation "androidx.camera:camera-view:$versions.cameraXOthers"
+//    implementation project(path: ':livenesscamerax:camera')
 
     //Square
 //    implementation "com.jakewharton.timber:timber:$versions.timber"
 }
 
-//afterEvaluate {
-//    publishing {
-//        publications {
-//            release(MavenPublication) {
-//                from components.release
-//                groupId = "com.schaefer.livenesscamerax"
-//                artifactId = "livenesscamerax"
-//                version = '0.0.2'
-//            }
+
+
+//publishing {
+//
+//    publications {
+//        coreLib(MavenPublication) {
+//            groupId 'com.ioptime'
+//            artifactId 'livenesscamerax:core'
+//            version '1.0'
+//            artifact(":livenesscamerax:core")
 //        }
+////        barTwo(MavenPublication) {
+////            groupId 'com.ioptime'
+////            artifactId 'livenesscamerax:domain'
+////            version '1.0'
+////            artifact(":livenesscamerax:domain")
+////        }
+////        barThree(MavenPublication) {
+////            groupId 'com.ioptime'
+////            artifactId 'livenesscamerax:camera'
+////            version '1.0'
+////            artifact(":livenesscamerax:camera")
+////        }
 //    }
 //}
+
+// used ./gradlew mymodule:assemble --dry-run to find where to put it
+//afterEvaluate {
+//    tasks.clean.dependsOn("publishToMavenLocal")
+//    tasks.preBuild.dependsOn("publishToMavenLocal")
+//}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = "com.ioptime"
+                artifactId = "livenesscamerax"
+                version = '1.0.0'
+            }
+        }
+    }
+}

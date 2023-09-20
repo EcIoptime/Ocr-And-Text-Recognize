@@ -1,24 +1,24 @@
-//plugins {
-//    id 'com.android.library'
-//    id 'maven-publish'
-//}
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
-configurations.maybeCreate("default")
-artifacts.add("default", file('fastdeploy-android-sdk-latest-dev.aar'))
+//configurations.maybeCreate("default")
+//artifacts.add("default", file('fastdeploy-android-sdk-latest-dev.aar'))
 
-//android {
-//    namespace 'com.ecioptime.fastdeploy'
-//    compileSdk 33
-//    buildToolsVersion "33.0.0"
-//
-//    defaultConfig {
-//        minSdk 23
-//        targetSdk 33
-//
-////        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-////        consumerProguardFiles "consumer-rules.pro"
-//    }
-//}
+android {
+    namespace 'com.ecioptime.fastdeploy'
+    compileSdk 33
+    buildToolsVersion "33.0.0"
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 33
+
+//        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+//        consumerProguardFiles "consumer-rules.pro"
+    }
+}
 
 
 
@@ -36,34 +36,78 @@ artifacts.add("default", file('fastdeploy-android-sdk-latest-dev.aar'))
 //    }
 //}
 
-
-
-
-//apply plugin: 'maven-publish'
-//
-//publishing {
-//    publications {
-//        aar(MavenPublication) {
-//            groupId = 'com.fast_deploy.paddleocrlib'
-//            artifactId = 'fast_deploy'
-//            version = '1.0.0'
-//
-////            from components.release
-//
-//            // Include dependencies in the AAR
-//            pom.withXml {
-//                def dependenciesNode = asNode().appendNode('dependencies')
-//                configurations.implementation.allDependencies.each {
-//                    def dependencyNode = dependenciesNode.appendNode('dependency')
-//                    dependencyNode.appendNode('groupId', it.group)
-//                    dependencyNode.appendNode('artifactId', it.name)
-//                    dependencyNode.appendNode('version', it.version)
-//                }
+//afterEvaluate {
+//    publishing{
+//        publications{
+//            release(MavenPublication){
+//                groupId = "com.ioptime"
+//                artifactId = "fast-deploy"
+//                version = "1.0.0"
+//                // Applies the component for the release build variant
+////                from components.release
+//                // Adds javadocs and sources as separate jars.
+//                artifact androidSourcesJar
+//                artifact androidJavadocsJar
 //            }
 //        }
 //    }
-//    repositories {
-//        mavenLocal() // Publish to local Maven repository
-//    }
 //}
-//
+
+afterEvaluate {
+    android.libraryVariants.each {variant->
+        publishing.publications.create(variant.name,MavenPublication){
+            from components.findByName(variant.name)
+
+            groupId = "com.ioptime"
+            artifactId = "fast-deploy"
+            version = '1.0.0'
+
+            artifact("fastdeploy-android-sdk-latest-dev.aar")
+
+//            artifact("$buildDir/outputs/aar/paddleOcrLib-debug.aar") {
+//                classifier 'aar-with-dependencies'
+//            }
+//            artifact("/libs/fastdeploy-android-sdk-latest-dev.aar") {
+//                classifier 'fastdeploy-android-sdk-latest-dev'
+//            }
+        }
+
+    }
+}
+
+
+task androidJavadocs(type: Javadoc){
+    source = android.sourceSets.main.java.srcDirs
+
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    android.libraryVariants.all{ variant->
+        if (variant.name == 'release'){
+            owner.classpath += variant.javaCompileProvider.get().classpath
+        }
+    }
+    // excluding a specific class from being documented
+    exclude '**/NameOfClassToExclude.java'
+
+    title = null
+
+    options{
+        doclet = "com.google.doclava.Doclava"
+        docletpath = [file("libs/doclava-1.0.6.jar")]
+        noTimestamp = false
+
+        // show only Protected & Public
+        memberLevel = JavadocMemberLevel.PROTECTED
+    }
+
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs){
+    archiveClassifier.set('javadoc')
+    from androidJavadocs.destinationDir
+}
+
+
+task androidSourcesJar(type: Jar){
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}

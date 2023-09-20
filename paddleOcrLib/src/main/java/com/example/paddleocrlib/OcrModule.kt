@@ -45,7 +45,6 @@ import kotlin.properties.Delegates
 
 class OcrModule : AppCompatActivity() {
 
-
     private var objectDetectorHelper: ObjectDetectorHelper? = null
     private var classifier: SignatureClassification? = null
     private val executor = Executors.newSingleThreadExecutor()
